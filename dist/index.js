@@ -1,3 +1,5 @@
+'use strict';
+
 /*
  * Copyright (c) 2023 Jose-Luis Landabaso
  * Distributed under the MIT software license.
@@ -170,24 +172,24 @@ function _isPoint(p, xOnly) {
   }
 }
 
-export function isPoint(p) {
+function isPoint(p) {
   return _isPoint(p, false);
 }
 
-export function isPointCompressed(p) {
+function isPointCompressed(p) {
   const PUBLIC_KEY_COMPRESSED_SIZE = 33;
   return _isPoint(p, false) && p.length === PUBLIC_KEY_COMPRESSED_SIZE;
 }
 
-export function isPrivate(d) {
+function isPrivate(d) {
   return necc.utils.isValidPrivateKey(d);
 }
 
-export function isXOnlyPoint(p) {
+function isXOnlyPoint(p) {
   return _isPoint(p, true);
 }
 
-export function xOnlyPointAddTweak(p, tweak) {
+function xOnlyPointAddTweak(p, tweak) {
   if (!isXOnlyPoint(p)) {
     throw new Error('Expected Point');
   }
@@ -201,14 +203,14 @@ export function xOnlyPointAddTweak(p, tweak) {
   });
 }
 
-export function xOnlyPointFromPoint(p) {
+function xOnlyPointFromPoint(p) {
   if (!isPoint(p)) {
     throw new Error('Expected Point');
   }
   return p.slice(1, 33);
 }
 
-export function pointFromScalar(sk, compressed) {
+function pointFromScalar(sk, compressed) {
   if (!isPrivate(sk)) {
     throw new Error('Expected Private');
   }
@@ -217,21 +219,21 @@ export function pointFromScalar(sk, compressed) {
   );
 }
 
-export function xOnlyPointFromScalar(d) {
+function xOnlyPointFromScalar(d) {
   if (!isPrivate(d)) {
     throw new Error('Expected Private');
   }
   return xOnlyPointFromPoint(pointFromScalar(d));
 }
 
-export function pointCompress(p, compressed) {
+function pointCompress(p, compressed) {
   if (!isPoint(p)) {
     throw new Error('Expected Point');
   }
   return necc.Point.fromHex(p).toRawBytes(assumeCompression(compressed, p));
 }
 
-export function pointMultiply(a, tweak, compressed) {
+function pointMultiply(a, tweak, compressed) {
   if (!isPoint(a)) {
     throw new Error('Expected Point');
   }
@@ -243,7 +245,7 @@ export function pointMultiply(a, tweak, compressed) {
   );
 }
 
-export function pointAdd(a, b, compressed) {
+function pointAdd(a, b, compressed) {
   if (!isPoint(a) || !isPoint(b)) {
     throw new Error('Expected Point');
   }
@@ -258,7 +260,7 @@ export function pointAdd(a, b, compressed) {
     }
   });
 }
-export function pointAddScalar(p, tweak, compressed) {
+function pointAddScalar(p, tweak, compressed) {
   if (!isPoint(p)) {
     throw new Error('Expected Point');
   }
@@ -270,7 +272,7 @@ export function pointAddScalar(p, tweak, compressed) {
   );
 }
 
-export function privateAdd(d, tweak) {
+function privateAdd(d, tweak) {
   if (isPrivate(d) === false) {
     throw new Error('Expected Private');
   }
@@ -280,7 +282,7 @@ export function privateAdd(d, tweak) {
   return throwToNull(() => _privateAdd(d, tweak));
 }
 
-export function privateSub(d, tweak) {
+function privateSub(d, tweak) {
   if (isPrivate(d) === false) {
     throw new Error('Expected Private');
   }
@@ -290,14 +292,14 @@ export function privateSub(d, tweak) {
   return throwToNull(() => _privateSub(d, tweak));
 }
 
-export function privateNegate(d) {
+function privateNegate(d) {
   if (isPrivate(d) === false) {
     throw new Error('Expected Private');
   }
   return _privateNegate(d);
 }
 
-export function sign(h, d, e) {
+function sign(h, d, e) {
   if (!isPrivate(d)) {
     throw new Error('Expected Private');
   }
@@ -310,7 +312,7 @@ export function sign(h, d, e) {
   return necc.signSync(h, d, { der: false, extraEntropy: e });
 }
 
-export function signSchnorr(h, d, e = Buffer.alloc(32, 0x00)) {
+function signSchnorr(h, d, e = Buffer.alloc(32, 0x00)) {
   if (!isPrivate(d)) {
     throw new Error('Expected Private');
   }
@@ -323,7 +325,7 @@ export function signSchnorr(h, d, e = Buffer.alloc(32, 0x00)) {
   return necc.schnorr.signSync(h, d, e);
 }
 
-export function verify(h, Q, signature, strict) {
+function verify(h, Q, signature, strict) {
   if (!isPoint(Q)) {
     throw new Error('Expected Point');
   }
@@ -336,7 +338,7 @@ export function verify(h, Q, signature, strict) {
   return necc.verify(signature, h, Q, { strict });
 }
 
-export function verifySchnorr(h, Q, signature) {
+function verifySchnorr(h, Q, signature) {
   if (!isXOnlyPoint(Q)) {
     throw new Error('Expected Point');
   }
@@ -348,3 +350,23 @@ export function verifySchnorr(h, Q, signature) {
   }
   return necc.schnorr.verifySync(signature, h, Q);
 }
+
+exports.isPoint = isPoint;
+exports.isPointCompressed = isPointCompressed;
+exports.isPrivate = isPrivate;
+exports.isXOnlyPoint = isXOnlyPoint;
+exports.pointAdd = pointAdd;
+exports.pointAddScalar = pointAddScalar;
+exports.pointCompress = pointCompress;
+exports.pointFromScalar = pointFromScalar;
+exports.pointMultiply = pointMultiply;
+exports.privateAdd = privateAdd;
+exports.privateNegate = privateNegate;
+exports.privateSub = privateSub;
+exports.sign = sign;
+exports.signSchnorr = signSchnorr;
+exports.verify = verify;
+exports.verifySchnorr = verifySchnorr;
+exports.xOnlyPointAddTweak = xOnlyPointAddTweak;
+exports.xOnlyPointFromPoint = xOnlyPointFromPoint;
+exports.xOnlyPointFromScalar = xOnlyPointFromScalar;
